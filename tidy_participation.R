@@ -1,6 +1,7 @@
 library(tidyverse)
 library(readxl)
 library(readr)
+library(rvest)
 
 file_name = "australian_marriage_law_postal_survey_2017_-_participation_final.xls"
 
@@ -69,5 +70,8 @@ ssm_participation_state <-
 # Final spread of participation measures to columns and write to csv
 ssm_participation_state %>%
   spread(measure, count) %>%
+  mutate(
+    `Eligible participants` = as.integer(`Eligible participants`),
+    `Total Paticipants` = as.integer(`Total participants`)) %>%
   write_csv(path = "SSM_AUS_Participation.csv")
 

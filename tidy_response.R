@@ -30,18 +30,24 @@ response_counts <-
   mutate(area = gsub("\\([a-z]\\)","",area)) %>%
   filter(!grepl("Total", area))
 
+# Append electoral data
+# Fetch the current electorates to append to table
+current_electorates <- 
+  read_html("http://www.aec.gov.au/profiles/") %>%
+  rvest::html_nodes("table") %>%
+  rvest::html_table() %>%
+  first() %>%
+  select(`Electoral division`, State, `Area (sq km)`)
 
-# Append cuto data
 response_data <- 
   response_counts %>%
   left_join(current_electorates, by = c("area" = "Electoral division"))
 
-# State Summary
-response_data %>%
-  group_by(State) %>%
-  summarise(yes_count = sum(Yes), total_count = sum(`Response Total`) )
-
 write_csv(response_data, "SSM_AUS_Response.csv")
 
+# Example State Summary
+# response_data %>%
+#  group_by(State) %>%
+#  summarise(yes_count = sum(Yes), total_count = sum(`Response Total`) )
 
 
