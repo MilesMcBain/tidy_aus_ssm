@@ -55,7 +55,7 @@ ssm_participation <-
   bind_rows() 
 
 
-# Fetch the current electorates to append to table
+# Fetch the current and old electorates to append to table
 current_electorates <- 
   read_html("http://www.aec.gov.au/profiles/") %>%
   rvest::html_nodes("table") %>%
@@ -63,9 +63,18 @@ current_electorates <-
   first() %>%
   select(`Electoral division`, State, `Area (sq km)`)
 
+old_electorates <- 
+  read_html("http://www.aec.gov.au/Electorates/abolished.htm") %>%
+  rvest::html_nodes("table") %>%
+  rvest::html_table() %>%
+  first() %>%
+  select(`Electoral division` = Division, State)
+
+electorates <- bind_rows(current_electorates, old_electorates)
+
 ssm_participation_state <- 
   ssm_participation %>%
-  left_join(current_electorates, by = c("area" = "Electoral division")) 
+  left_join(electorates, by = c("area" = "Electoral division")) 
 
 # Final spread of participation measures to columns and write to csv
 ssm_participation_state %>%
